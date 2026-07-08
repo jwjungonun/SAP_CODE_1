@@ -1,0 +1,208 @@
+<mvc:View controllerName="zpe1coview.zpe1coview.controller.zpe1_co_view"
+    xmlns="sap.m" xmlns:mvc="sap.ui.core.mvc" xmlns:core="sap.ui.core"
+    xmlns:viz="sap.viz.ui5.controls"
+    xmlns:vizData="sap.viz.ui5.data"
+    xmlns:vizFeeds="sap.viz.ui5.controls.common.feeds">
+    <Page id="page" showHeader="false" class="pePage" busy="{view>/busy}">
+        <content>
+            <VBox class="peShell">
+
+                <!-- ===== Hero + 필터바 (글로시, sticky) ===== -->
+                <VBox class="peHeroSticky">
+                    <HBox class="peHero" alignItems="Center" justifyContent="SpaceBetween">
+                        <HBox alignItems="Center" class="peHeroLeft">
+                            <core:Icon src="sap-icon://document-text" class="peHeroIcon"/>
+                            <VBox class="peHeroTitleBox">
+                                <Text text="관리회계 전표 조회" class="peHeroTitle"/>
+                                <Text text="전표 항목 조회 후 행 선택 시 전표 항목 상세 표시" class="peHeroSub"/>
+                            </VBox>
+                        </HBox>
+                        <HBox class="peHeroMetrics" alignItems="Center">
+                            <VBox class="peHeroMetric">
+                                <Text text="전표 항목" class="peHeroMetricLabel"/>
+                                <Text text="{view>/headerCount} 건" class="peHeroMetricValue"/>
+                            </VBox>
+                            <VBox class="peHeroMetric">
+                                <Text text="전표 항목 상세" class="peHeroMetricLabel"/>
+                                <Text text="{= ${view>/items}.length } 건" class="peHeroMetricValue"/>
+                            </VBox>
+                        </HBox>
+                    </HBox>
+
+                    <!-- 조회조건 -->
+                    <HBox class="peFilterBar" alignItems="End" wrap="Wrap" justifyContent="SpaceBetween">
+                        <HBox class="peFilterGroup" alignItems="End" wrap="Wrap">
+                        <VBox class="peFilterItem">
+                            <Text text="관리회계영역" class="peFilterLbl"/>
+                            <Input id="fKokrs" value="1000" width="7rem"/>
+                        </VBox>
+                        <VBox class="peFilterItem">
+                            <Text text="회계연도" class="peFilterLbl"/>
+                            <Input id="fGjahr" value="2026" width="6rem"/>
+                        </VBox>
+                        <VBox class="peFilterItem">
+                            <Text text="전기일 (범위)" class="peFilterLbl"/>
+                            <DateRangeSelection id="fBudat" width="17rem" displayFormat="yyyy-MM-dd"/>
+                        </VBox>
+                        <VBox class="peFilterItem">
+                            <Text text="전표번호 검색" class="peFilterLbl"/>
+                            <SearchField id="fSearch" width="15rem" placeholder="전표번호" search=".onSearch"/>
+                        </VBox>
+                        <Button text="조회" icon="sap-icon://search" type="Emphasized" press=".onSearch" class="peSearchBtn"/>
+                        </HBox>
+                        <HBox class="peFilterActions" alignItems="End">
+                            <Button text="확장 조회" icon="sap-icon://filter-fields" press=".onOpenExtended" class="peExtBtn"/>
+                            <ObjectStatus text="확장 조건 적용중" state="Information" icon="sap-icon://filter" class="peExtFlag" visible="{view>/extActive}"/>
+                        </HBox>
+                    </HBox>
+                </VBox>
+
+                <!-- ===== 상단: 헤더 목록(2/3) + 요약·차트(1/3) ===== -->
+                <HBox class="peContentRow peHeroAligned" alignItems="Start">
+
+                    <!-- 헤더 목록 -->
+                    <VBox class="peSection peTableSection peCol2">
+                        <layoutData><FlexItemData growFactor="2" baseSize="0%"/></layoutData>
+                        <HBox class="peSectionHead" alignItems="Center" justifyContent="SpaceBetween">
+                            <HBox alignItems="Center">
+                                <Title text="전표 항목" class="peSectionTitle"/>
+                                <Text text="{view>/headerCount} 건" class="peCountChip"/>
+                            </HBox>
+                        </HBox>
+                        <ScrollContainer height="31rem" width="100%" vertical="true" horizontal="false" class="peHdrScroll">
+                        <Table id="hdrTable" items="{view>/headers}" mode="SingleSelectMaster" sticky="ColumnHeaders"
+                            selectionChange=".onSelectHeader" growing="true" growingThreshold="50" growingScrollToLoad="true"
+                            noDataText="조회 결과가 없습니다. 조건을 입력하고 [조회]를 누르세요.">
+                            <columns>
+                                <Column><Text text="전표번호"/></Column>
+                                <Column hAlign="Center"><Text text="연도"/></Column>
+                                <Column hAlign="Center"><Text text="전기일"/></Column>
+                                <Column><Text text="전표유형"/></Column>
+                                <Column hAlign="Center"><Text text="상태"/></Column>
+                                <Column><Text text="참조"/></Column>
+                            </columns>
+                            <items>
+                                <ColumnListItem type="Active">
+                                    <cells>
+                                        <Text text="{view>Belnr}" class="peMemberName"/>
+                                        <Text text="{view>Gjahr}"/>
+                                        <Text text="{path:'view>Budat', formatter:'.fmtDate'}"/>
+                                        <Text text="{path:'view>Blart', formatter:'.fmtBlart'}"/>
+                                        <ObjectStatus text="{view>Status}" state="{path:'view>Status', formatter:'.fmtStatusState'}"/>
+                                        <Text text="{= ${view>RefModule} ? ${view>RefModule} + ' ' + ${view>RefBelnr} : '' }"/>
+                                    </cells>
+                                </ColumnListItem>
+                            </items>
+                        </Table>
+                        </ScrollContainer>
+                    </VBox>
+
+                    <!-- 요약 + 차트 -->
+                    <VBox class="peCol1 peChartCol">
+                        <layoutData><FlexItemData growFactor="1" baseSize="0%"/></layoutData>
+
+                        <!-- 선택 전표 요약 -->
+                        <VBox class="peChartPanel peAccentBlue peSummary">
+                            <Title text="선택 전표 요약" class="peChartTitle"/>
+                            <Text text="{= ${view>/summary/belnr} ? ('전표 ' + ${view>/summary/belnr} + ' · ' + ${view>/summary/budat}) : '전표 항목 선택하세요' }" class="peChartSub"/>
+                            <HBox class="peSumRow" justifyContent="SpaceBetween"><Text text="전표 항목 상세 건수" class="peSumLbl"/><Text text="{view>/summary/count}" class="peSumVal"/></HBox>
+                            <HBox class="peSumRow" justifyContent="SpaceBetween"><Text text="차변 합계" class="peSumLbl"/><Text text="{path:'view>/summary/debit', formatter:'.fmtAmt'}" class="peSumVal peAmtPos"/></HBox>
+                            <HBox class="peSumRow" justifyContent="SpaceBetween"><Text text="대변 합계" class="peSumLbl"/><Text text="{path:'view>/summary/credit', formatter:'.fmtAmt'}" class="peSumVal peAmtNeg"/></HBox>
+                            <HBox class="peSumRow peSumNet" justifyContent="SpaceBetween"><Text text="순액 (차-대)" class="peSumLbl"/><Text text="{path:'view>/summary/net', formatter:'.fmtAmt'}" class="peSumVal"/></HBox>
+                        </VBox>
+
+                        <!-- 생산/매출 현황 파이 (전표 유형에 따라 동적) -->
+                        <VBox class="peChartPanel peAccentGreen">
+                            <Title text="{view>/chartTitle}" class="peChartTitle"/>
+                            <Text text="{view>/chartSub}" class="peChartSub"/>
+                            <viz:VizFrame id="docCstypDonut" vizType="pie" height="240px" width="100%" uiConfig="{applicationSet:'fiori'}">
+                                <viz:dataset>
+                                    <vizData:FlattenedDataset data="{view>/chart}">
+                                        <vizData:dimensions>
+                                            <vizData:DimensionDefinition name="항목" value="{view>name}"/>
+                                        </vizData:dimensions>
+                                        <vizData:measures>
+                                            <vizData:MeasureDefinition name="금액" value="{view>value}"/>
+                                        </vizData:measures>
+                                    </vizData:FlattenedDataset>
+                                </viz:dataset>
+                                <viz:feeds>
+                                    <vizFeeds:FeedItem uid="size" type="Measure" values="금액"/>
+                                    <vizFeeds:FeedItem uid="color" type="Dimension" values="항목"/>
+                                </viz:feeds>
+                            </viz:VizFrame>
+                        </VBox>
+                    </VBox>
+                </HBox>
+
+                <!-- ===== 하단: 아이템 목록 (전체폭) ===== -->
+                <VBox class="peSection peItemSection">
+                    <HBox class="peSectionHead" alignItems="Center" justifyContent="SpaceBetween">
+                        <HBox alignItems="Center">
+                            <Title text="전표 항목 상세" class="peSectionTitle"/>
+                            <Text text="{= ${view>/items}.length } 건" class="peCountChip"/>
+                        </HBox>
+                    </HBox>
+                    <ScrollContainer height="22rem" width="100%" vertical="true" horizontal="false" class="peHdrScroll">
+                    <Table id="itemTable" items="{view>/items}" growing="true" growingThreshold="100" growingScrollToLoad="true" sticky="ColumnHeaders"
+                        noDataText="전표 항목을 선택하면 전표 항목 상세가 표시됩니다.">
+                        <columns>
+                            <Column><Text text="전표 번호"/></Column>
+                            <Column><Text text="원가요소"/></Column>
+                            <Column><Text text="코스트센터"/></Column>
+                            <Column><Text text="손익센터"/></Column>
+                            <Column><Text text="자재"/></Column>
+                            <!--
+                            <Column hAlign="Center"><Text text="활동유형"/></Column>
+                            -->
+                            <!--
+                            <Column hAlign="Center"><Text text="원가구분"/></Column>
+                            <Column hAlign="End"><Text text="수량"/></Column>
+                            -->
+                            <Column hAlign="End"><Text text="금액"/></Column>
+                            <Column hAlign="Center"><Text text="차/대"/></Column>
+                        </columns>
+                        <items>
+                            <ColumnListItem>
+                                <cells>
+                                    <Text text="{view>Belnr}" class="peMemberName"/>
+                                    <Text text="{= ${view>Kstar} + ( ${view>Ltext} ? ' ' + ${view>Ltext} : '' ) }"/>
+                                    <Text text="{= ${view>Kostl} ? ${view>Kostl} + ( ${view>Ktext} ? ' ' + ${view>Ktext} : '' ) : '' }"/>
+                                    <Text text="{= ${view>Prctr} ? ${view>Prctr} + ( ${view>Ptext} ? ' ' + ${view>Ptext} : '' ) : '' }"/>
+                                    <Text text="{= ${view>Matnr} ? ${view>Matnr} + ( ${view>Maktx} ? ' ' + ${view>Maktx} : '' ) : '' }"/>
+                                    <Text text="{view>Lstar}"/>
+                                    <Text text="{view>Cstyp}"/>
+                                    <Text text="{= ${view>Megbtr} ? ${view>Megbtr} + ' ' + ${view>Meins} : '' }"/>
+                                    <Text text="{path:'view>Dmbtr', formatter:'.fmtAmt'}"/>
+                                    <ObjectStatus text="{path:'view>Shkzg', formatter:'.fmtShkzgText'}" state="{path:'view>Shkzg', formatter:'.fmtShkzgState'}"/>
+                                </cells>
+                            </ColumnListItem>
+                        </items>
+                    </Table>
+                    </ScrollContainer>
+                </VBox>
+
+            </VBox>
+        </content>
+        <dependents>
+            <Dialog id="extDialog" title="확장 조회 — 원가요소 · 코스트센터 · 손익센터" contentWidth="30rem" class="peExtDialog">
+                <content>
+                    <VBox class="peExtForm">
+                        <Text text="현재 조회 범위(ViewiSet)의 값으로 F4를 제공합니다. 입력한 확장 조건을 만족하는 전표 항목 상세가 있는 전표만 전표 항목 목록에 남깁니다." class="peExtHint"/>
+                        <Label text="원가요소 (Kstar)" class="peExtLbl"/>
+                        <Input id="extKstar" value="{view>/ext/kstar}" showValueHelp="true" valueHelpRequest=".onF4Kstar" placeholder="F4로 선택하거나 입력"/>
+                        <Label text="코스트센터 (Kostl)" class="peExtLbl"/>
+                        <Input id="extKostl" value="{view>/ext/kostl}" showValueHelp="true" valueHelpRequest=".onF4Kostl" placeholder="F4로 선택하거나 입력"/>
+                        <Label text="손익센터 (Prctr)" class="peExtLbl"/>
+                        <Input id="extPrctr" value="{view>/ext/prctr}" showValueHelp="true" valueHelpRequest=".onF4Prctr" placeholder="F4로 선택하거나 입력"/>
+                    </VBox>
+                </content>
+                <buttons>
+                    <Button text="확장 조회" type="Emphasized" icon="sap-icon://search" press=".onExtendedSearch"/>
+                    <Button text="초기화" press=".onClearExtended"/>
+                    <Button text="취소" press=".onCloseExtended"/>
+                </buttons>
+            </Dialog>
+        </dependents>
+    </Page>
+</mvc:View>

@@ -1,0 +1,63 @@
+<mvc:View controllerName="zpe1coeval.zpe1coeval.controller.ProfitTable"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:core="sap.ui.core"
+    xmlns="sap.m">
+    <Page id="ptPage" showHeader="false" class="pePage" busy="{view>/meta/busy}" busyIndicatorDelay="0">
+        <content>
+            <VBox class="peShell">
+
+                <!-- ===== Hero (동일 디자인 + 뒤로가기) ===== -->
+                <HBox class="peHero" alignItems="Center" justifyContent="SpaceBetween" wrap="Wrap">
+                    <HBox alignItems="Center" class="peHeroTitleBlock">
+                        <Button icon="sap-icon://nav-back" type="Transparent" class="peHeroBack" tooltip="뒤로" press=".onNavBack"/>
+                        <core:Icon src="sap-icon://business-objects-experience" class="peHeroIcon"/>
+                        <VBox>
+                            <Title text="수익성 분석" level="H1" class="peHeroTitle"/>
+                            <Text text="손익센터 · 제품 · 거래처 · 제품군 · 세그먼트 기준 수익성 평가" class="peHeroSubtitle"/>
+                        </VBox>
+                    </HBox>
+                    <HBox class="peHeroMetrics" alignItems="Center">
+                        <VBox class="peHeroMetric">
+                            <Text text="조회 기간" class="peHeroMetricLabel"/>
+                            <Text text="{view>/meta/periodText}" class="peHeroMetricValue"/>
+                        </VBox>
+                    </HBox>
+                </HBox>
+
+                <!-- ===== 수익성 테이블 (선택 축 1개 또는 전체 축) — axesList 반복 ===== -->
+                <VBox id="ptList" items="{view>/meta/ptAxes}">
+                    <VBox class="peSection peTableSection peHeroAligned">
+                        <HBox class="peSectionHeader" alignItems="Center" justifyContent="SpaceBetween">
+                            <Title text="{view>label}별 수익성" level="H2"/>
+                            <Text text="대상 {view>count}건" class="peCountChip"/>
+                        </HBox>
+                        <Table items="{view>members}" growing="true" growingThreshold="20" growingScrollToLoad="false" alternateRowColors="true">
+                            <columns>
+                                <Column><Text text="{view>label}"/></Column>
+                                <Column hAlign="End"><Text text="매출액"/></Column>
+                                <Column hAlign="End" minScreenWidth="Tablet" demandPopin="true"><Text text="매출원가"/></Column>
+                                <Column hAlign="End"><Text text="매출이익"/></Column>
+                                <Column hAlign="End"><Text text="이익률"/></Column>
+                            </columns>
+                            <items>
+                                <ColumnListItem>
+                                    <cells>
+                                        <VBox class="peMemberName">
+                                            <Text text="{view>text}"/>
+                                            <Text text="{view>code}" class="peMemberCode"/>
+                                        </VBox>
+                                        <ObjectNumber number="{path:'view>sales', formatter:'.fmtAmount'}" unit="{view>/kpi/currency}"/>
+                                        <ObjectNumber number="{path:'view>cost', formatter:'.fmtAmount'}" unit="{view>/kpi/currency}"/>
+                                        <ObjectNumber number="{path:'view>profit', formatter:'.fmtAmount'}" unit="{view>/kpi/currency}" state="{path:'view>profit', formatter:'.stateBySign'}"/>
+                                        <ObjectNumber number="{path:'view>rate', formatter:'.fmtRate'}" state="{path:'view>rate', formatter:'.stateBySign'}" emphasized="true"/>
+                                    </cells>
+                                </ColumnListItem>
+                            </items>
+                        </Table>
+                    </VBox>
+                </VBox>
+
+            </VBox>
+        </content>
+    </Page>
+</mvc:View>

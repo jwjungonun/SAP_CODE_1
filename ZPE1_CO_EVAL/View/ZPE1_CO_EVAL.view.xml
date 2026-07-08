@@ -1,0 +1,413 @@
+<mvc:View controllerName="zpe1coeval.zpe1coeval.controller.ZPE1_CO_EVAL"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:core="sap.ui.core"
+    xmlns:viz="sap.viz.ui5.controls"
+    xmlns:viz.data="sap.viz.ui5.data"
+    xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds"
+    xmlns="sap.m">
+    <Page id="page" showHeader="false" class="pePage" busy="{view>/meta/busy}" busyIndicatorDelay="0">
+        <content>
+            <VBox class="peShell">
+
+                <!-- ===== Hero (sticky) ===== -->
+                <VBox class="peHeroSticky">
+                <HBox class="peHero" alignItems="Center" justifyContent="SpaceBetween" wrap="Wrap">
+                    <HBox alignItems="Center" class="peHeroTitleBlock">
+                        <core:Icon src="sap-icon://business-objects-experience" class="peHeroIcon"/>
+                        <VBox>
+                            <Title text="수익성 분석" level="H1" class="peHeroTitle"/>
+                            <Text text="손익센터 · 거래처 · 제품군 · 세그먼트 기준 수익성 평가" class="peHeroSubtitle"/>
+                        
+                
+</VBox>
+                    </HBox>
+                    <HBox class="peHeroMetrics" alignItems="Center">
+                        <VBox class="peHeroMetric">
+                            <Text text="조회 기간" class="peHeroMetricLabel"/>
+                            <Text text="{view>/meta/periodText}" class="peHeroMetricValue"/>
+                        </VBox>
+                    </HBox>
+                </HBox>
+                <!-- ===== 기간(시작~종료) + 항목 조회 필터바 ===== -->
+                <VBox class="peFilterBar">
+                    <HBox alignItems="Center" wrap="Wrap" class="peFilterRowTop" justifyContent="SpaceBetween">
+                        <HBox alignItems="Center" wrap="Wrap" class="peFilterGroup">
+                            <Label text="조회 기간" class="peFilterLabel"/>
+                            <Select selectedKey="{view>/meta/yearSel}" items="{view>/meta/years}" width="8rem">
+                                <core:Item key="{view>key}" text="{view>text}"/>
+                            </Select>
+                            <Select selectedKey="{view>/meta/monthSel}" items="{view>/meta/months}" width="8rem">
+                                <core:Item key="{view>key}" text="{view>text}"/>
+                            </Select>
+                            <Button text="조회" icon="sap-icon://search" type="Emphasized" press=".onApplyFilter" class="peFilterGo"/>
+                        </HBox>
+                        <HBox alignItems="Center" class="peFilterActions">
+                            <Button text="수익성 조회" icon="sap-icon://table-view" type="Transparent" press=".onOpenProfitTable" class="peBtnProfit"/>
+                            <Button text="새로고침" icon="sap-icon://refresh" type="Transparent" press=".onRefresh" class="peBtnRefresh"/>
+                        </HBox>
+                    </HBox>
+                    <HBox alignItems="Center" wrap="Wrap" class="peFilterRowDims" visible="{= ${view>/meta/selectedTab} !== 'all'}">
+                        <Label text="손익센터" class="peFilterLabel" visible="{= ${view>/meta/selectedTab} === 'prctr'}"/>
+                        <ComboBox selectedKey="{view>/meta/dimSel/prctr}" items="{view>/meta/dims/prctr}" placeholder="손익센터" class="peDimBox" visible="{= ${view>/meta/selectedTab} === 'prctr'}">
+                            <core:Item key="{view>key}" text="{view>text}"/>
+                        </ComboBox>
+                        <Label text="제품" class="peFilterLabel" visible="{= ${view>/meta/selectedTab} === 'matnr'}"/>
+                        <ComboBox selectedKey="{view>/meta/dimSel/matnr}" items="{view>/meta/dims/matnr}" placeholder="제품" class="peDimBox" visible="{= ${view>/meta/selectedTab} === 'matnr'}">
+                            <core:Item key="{view>key}" text="{view>text}"/>
+                        </ComboBox>
+                        <Label text="거래처" class="peFilterLabel" visible="{= ${view>/meta/selectedTab} === 'partner'}"/>
+                        <ComboBox selectedKey="{view>/meta/dimSel/partner}" items="{view>/meta/dims/partner}" placeholder="거래처" class="peDimBox" visible="{= ${view>/meta/selectedTab} === 'partner'}">
+                            <core:Item key="{view>key}" text="{view>text}"/>
+                        </ComboBox>
+                        <Label text="제품군" class="peFilterLabel" visible="{= ${view>/meta/selectedTab} === 'matkl'}"/>
+                        <ComboBox selectedKey="{view>/meta/dimSel/matkl}" items="{view>/meta/dims/matkl}" placeholder="제품군" class="peDimBox" visible="{= ${view>/meta/selectedTab} === 'matkl'}">
+                            <core:Item key="{view>key}" text="{view>text}"/>
+                        </ComboBox>
+                        <Label text="세그먼트" class="peFilterLabel" visible="{= ${view>/meta/selectedTab} === 'segment'}"/>
+                        <ComboBox selectedKey="{view>/meta/dimSel/segment}" items="{view>/meta/dims/segment}" placeholder="세그먼트" class="peDimBox" visible="{= ${view>/meta/selectedTab} === 'segment'}">
+                            <core:Item key="{view>key}" text="{view>text}"/>
+                        </ComboBox>
+                    </HBox>
+                </VBox>
+                <!-- ===== 항목 탭(4축) — sticky 헤더 내 필터바 아래: 스크롤 시에도 표시 ===== -->
+                <RadioButtonGroup id="axisTabs" class="peTabBar" columns="4"
+                    selectedIndex="{= ${view>/meta/selectedTab} === 'partner' ? 1 : (${view>/meta/selectedTab} === 'matkl' ? 2 : (${view>/meta/selectedTab} === 'segment' ? 3 : 0)) }"
+                    select=".onTabSelect">
+                    <RadioButton text="손익센터"/>
+                    <RadioButton text="거래처"/>
+                    <RadioButton text="제품군"/>
+                    <RadioButton text="세그먼트"/>
+                </RadioButtonGroup>
+                </VBox>
+
+                <!-- ===== KPI strip (MM 에이징 KPI 스타일) ===== -->
+                <HBox class="peKpiStrip" width="100%" wrap="Wrap" justifyContent="Start">
+                    <VBox class="peKpiCard peKpiBlue">
+                        <HBox class="peKpiTop" justifyContent="SpaceBetween" alignItems="Start">
+                            <Text text="매출액" class="peKpiLabel"/>
+                            <core:Icon src="sap-icon://sales-order" class="peKpiIcon peKpiIconBlue"/>
+                        </HBox>
+                        <Text text="{view>/kpi/salesText}" class="peKpiValue"/>
+                        <Text text="총 합계" class="peKpiHint"/>
+                    </VBox>
+                    <VBox class="peKpiCard peKpiAmber">
+                        <HBox class="peKpiTop" justifyContent="SpaceBetween" alignItems="Start">
+                            <Text text="매출원가" class="peKpiLabel"/>
+                            <core:Icon src="sap-icon://money-bills" class="peKpiIcon peKpiIconAmber"/>
+                        </HBox>
+                        <Text text="{view>/kpi/costText}" class="peKpiValue"/>
+                        <Text text="총 합계" class="peKpiHint"/>
+                    </VBox>
+                    <VBox class="peKpiCard peKpiGreen">
+                        <HBox class="peKpiTop" justifyContent="SpaceBetween" alignItems="Start">
+                            <Text text="매출이익" class="peKpiLabel"/>
+                            <core:Icon src="sap-icon://line-chart" class="peKpiIcon peKpiIconGreen"/>
+                        </HBox>
+                        <Text text="{view>/kpi/profitText}" class="peKpiValue"/>
+                        <Text text="총 합계" class="peKpiHint"/>
+                    </VBox>
+                    <VBox class="peKpiCard peKpiPurple">
+                        <HBox class="peKpiTop" justifyContent="SpaceBetween" alignItems="Start">
+                            <Text text="평균 이익률" class="peKpiLabel"/>
+                            <core:Icon src="sap-icon://pie-chart" class="peKpiIcon peKpiIconPurple"/>
+                        </HBox>
+                        <ObjectNumber class="peKpiValue" number="{path:'view>/kpi/rate', formatter:'.fmtRate'}"/>
+                        <Text text="매출이익 / 매출액" class="peKpiHint"/>
+                    </VBox>
+                </HBox>
+
+
+                <!-- ===== 축 상세(단일 축): 1블록을 컨트롤러가 선택 축으로 bindElement ===== -->
+                <VBox id="axisDetail" class="peAxisRoot" visible="{= ${view>/meta/selectedTab} !== 'all' }">
+                    <VBox class="peSection">
+                        <HBox class="peSectionHeader" alignItems="Center" justifyContent="SpaceBetween">
+                            <Title text="{view>label} 분석" level="H2"/>
+                            <HBox alignItems="Center" class="peProductFilterBar" visible="{= ${view>/meta/productPage/active} }">
+                                <Text text="제품군: {view>/meta/productPage/matklName}" class="peCountChip"/>
+                                <Button text="돌아가기" icon="sap-icon://nav-back" type="Transparent" press=".onProductBack"/>
+                            </HBox>
+                            <Text text="대상 {view>count}건" class="peCountChip"/>
+                        </HBox>
+                        <VBox class="peAnalysisGrid peSig-prctr" visible="{= ${view>/meta/selectedTab} === 'prctr'}">
+                            <VBox class="peChartPanel peAccentBlue">
+                                <Title text="매출이익 (상위)" level="H3"/>
+                                <viz:VizFrame height="300px" width="100%" vizType="column" uiConfig="{applicationSet:'fiori'}" selectData=".onDetailSelect">
+                                    <viz:dataset>
+                                        <viz.data:FlattenedDataset data="{view>chartProfit}">
+                                            <viz.data:dimensions><viz.data:DimensionDefinition name="항목" value="{view>name}"/></viz.data:dimensions>
+                                            <viz.data:measures><viz.data:MeasureDefinition name="매출이익" value="{view>value}"/></viz.data:measures>
+                                        </viz.data:FlattenedDataset>
+                                    </viz:dataset>
+                                    <viz:feeds>
+                                        <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="매출이익"/>
+                                        <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="항목"/>
+                                    </viz:feeds>
+                                </viz:VizFrame>
+                            </VBox>
+                            <VBox class="peChartPanel peAccentPurple">
+                                <Title text="이익률 (상위)" level="H3"/>
+                                <viz:VizFrame height="260px" width="100%" vizType="bar" uiConfig="{applicationSet:'fiori'}" selectData=".onDetailSelect">
+                                    <viz:dataset>
+                                        <viz.data:FlattenedDataset data="{view>chartRate}">
+                                            <viz.data:dimensions><viz.data:DimensionDefinition name="항목" value="{view>name}"/></viz.data:dimensions>
+                                            <viz.data:measures><viz.data:MeasureDefinition name="이익률" value="{view>value}"/></viz.data:measures>
+                                        </viz.data:FlattenedDataset>
+                                    </viz:dataset>
+                                    <viz:feeds>
+                                        <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="이익률"/>
+                                        <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="항목"/>
+                                    </viz:feeds>
+                                </viz:VizFrame>
+                            </VBox>
+                            <HBox class="peChartRow" wrap="Wrap">
+                            <VBox class="peChartPanel peAccentGreen">
+                                <Title text="매출액 구성" level="H3"/>
+                                <viz:VizFrame height="250px" width="100%" vizType="donut" uiConfig="{applicationSet:'fiori'}" selectData=".onDetailSelect">
+                                    <viz:dataset>
+                                        <viz.data:FlattenedDataset data="{view>chartSales}">
+                                            <viz.data:dimensions><viz.data:DimensionDefinition name="항목" value="{view>name}"/></viz.data:dimensions>
+                                            <viz.data:measures><viz.data:MeasureDefinition name="매출액" value="{view>value}"/></viz.data:measures>
+                                        </viz.data:FlattenedDataset>
+                                    </viz:dataset>
+                                    <viz:feeds>
+                                        <viz.feeds:FeedItem uid="size" type="Measure" values="매출액"/>
+                                        <viz.feeds:FeedItem uid="color" type="Dimension" values="항목"/>
+                                    </viz:feeds>
+                                </viz:VizFrame>
+                            </VBox>
+                            <VBox class="peChartPanel peAccentAmber">
+                                <Title text="매출원가 구성" level="H3"/>
+                                <viz:VizFrame height="250px" width="100%" vizType="donut" uiConfig="{applicationSet:'fiori'}" selectData=".onDetailSelect">
+                                    <viz:dataset>
+                                        <viz.data:FlattenedDataset data="{view>chartCost}">
+                                            <viz.data:dimensions><viz.data:DimensionDefinition name="항목" value="{view>name}"/></viz.data:dimensions>
+                                            <viz.data:measures><viz.data:MeasureDefinition name="매출원가" value="{view>value}"/></viz.data:measures>
+                                        </viz.data:FlattenedDataset>
+                                    </viz:dataset>
+                                    <viz:feeds>
+                                        <viz.feeds:FeedItem uid="size" type="Measure" values="매출원가"/>
+                                        <viz.feeds:FeedItem uid="color" type="Dimension" values="항목"/>
+                                    </viz:feeds>
+                                </viz:VizFrame>
+                            </VBox>
+                            </HBox>
+                        </VBox>
+                        <VBox class="peAnalysisGrid peSig-partner" visible="{= ${view>/meta/selectedTab} === 'partner'}">
+                            <VBox class="peChartPanel peAccentBlue">
+                                <Title text="매출이익 Top 랭킹" level="H3"/>
+                                <viz:VizFrame height="340px" width="100%" vizType="bar" uiConfig="{applicationSet:'fiori'}" selectData=".onDetailSelect">
+                                    <viz:dataset>
+                                        <viz.data:FlattenedDataset data="{view>chartProfit}">
+                                            <viz.data:dimensions><viz.data:DimensionDefinition name="항목" value="{view>name}"/></viz.data:dimensions>
+                                            <viz.data:measures><viz.data:MeasureDefinition name="매출이익" value="{view>value}"/></viz.data:measures>
+                                        </viz.data:FlattenedDataset>
+                                    </viz:dataset>
+                                    <viz:feeds>
+                                        <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="매출이익"/>
+                                        <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="항목"/>
+                                    </viz:feeds>
+                                </viz:VizFrame>
+                            </VBox>
+                            <HBox class="peChartRow" wrap="Wrap">
+                            <VBox class="peChartPanel peAccentGreen">
+                                <Title text="매출액 구성" level="H3"/>
+                                <viz:VizFrame height="250px" width="100%" vizType="donut" uiConfig="{applicationSet:'fiori'}" selectData=".onDetailSelect">
+                                    <viz:dataset>
+                                        <viz.data:FlattenedDataset data="{view>chartSales}">
+                                            <viz.data:dimensions><viz.data:DimensionDefinition name="항목" value="{view>name}"/></viz.data:dimensions>
+                                            <viz.data:measures><viz.data:MeasureDefinition name="매출액" value="{view>value}"/></viz.data:measures>
+                                        </viz.data:FlattenedDataset>
+                                    </viz:dataset>
+                                    <viz:feeds>
+                                        <viz.feeds:FeedItem uid="size" type="Measure" values="매출액"/>
+                                        <viz.feeds:FeedItem uid="color" type="Dimension" values="항목"/>
+                                    </viz:feeds>
+                                </viz:VizFrame>
+                            </VBox>
+                            <VBox class="peChartPanel peAccentAmber">
+                                <Title text="매출원가 구성" level="H3"/>
+                                <viz:VizFrame height="250px" width="100%" vizType="donut" uiConfig="{applicationSet:'fiori'}" selectData=".onDetailSelect">
+                                    <viz:dataset>
+                                        <viz.data:FlattenedDataset data="{view>chartCost}">
+                                            <viz.data:dimensions><viz.data:DimensionDefinition name="항목" value="{view>name}"/></viz.data:dimensions>
+                                            <viz.data:measures><viz.data:MeasureDefinition name="매출원가" value="{view>value}"/></viz.data:measures>
+                                        </viz.data:FlattenedDataset>
+                                    </viz:dataset>
+                                    <viz:feeds>
+                                        <viz.feeds:FeedItem uid="size" type="Measure" values="매출원가"/>
+                                        <viz.feeds:FeedItem uid="color" type="Dimension" values="항목"/>
+                                    </viz:feeds>
+                                </viz:VizFrame>
+                            </VBox>
+                            <VBox class="peChartPanel peAccentPurple">
+                                <Title text="이익률 (상위)" level="H3"/>
+                                <viz:VizFrame height="250px" width="100%" vizType="bar" uiConfig="{applicationSet:'fiori'}" selectData=".onDetailSelect">
+                                    <viz:dataset>
+                                        <viz.data:FlattenedDataset data="{view>chartRate}">
+                                            <viz.data:dimensions><viz.data:DimensionDefinition name="항목" value="{view>name}"/></viz.data:dimensions>
+                                            <viz.data:measures><viz.data:MeasureDefinition name="이익률" value="{view>value}"/></viz.data:measures>
+                                        </viz.data:FlattenedDataset>
+                                    </viz:dataset>
+                                    <viz:feeds>
+                                        <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="이익률"/>
+                                        <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="항목"/>
+                                    </viz:feeds>
+                                </viz:VizFrame>
+                            </VBox>
+                            </HBox>
+                        </VBox>
+                        <VBox class="peAnalysisGrid peSig-matkl" visible="{= ${view>/meta/selectedTab} === 'matkl'}">
+                            <VBox class="peChartPanel peAccentGreen">
+                                <Title text="매출액 · 매출원가 믹스" level="H3"/>
+                                <viz:VizFrame height="320px" width="100%" vizType="stacked_column" uiConfig="{applicationSet:'fiori'}" selectData=".onDetailSelect">
+                                    <viz:dataset>
+                                        <viz.data:FlattenedDataset data="{view>chartMix}">
+                                            <viz.data:dimensions><viz.data:DimensionDefinition name="항목" value="{view>name}"/></viz.data:dimensions>
+                                            <viz.data:measures>
+                                                <viz.data:MeasureDefinition name="매출액" value="{view>sales}"/>
+                                                <viz.data:MeasureDefinition name="매출원가" value="{view>cost}"/>
+                                            </viz.data:measures>
+                                        </viz.data:FlattenedDataset>
+                                    </viz:dataset>
+                                    <viz:feeds>
+                                        <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="매출액,매출원가"/>
+                                        <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="항목"/>
+                                    </viz:feeds>
+                                </viz:VizFrame>
+                            </VBox>
+                            <HBox class="peChartRow" wrap="Wrap">
+                            <VBox class="peChartPanel peAccentBlue">
+                                <Title text="매출이익 (상위)" level="H3"/>
+                                <viz:VizFrame height="260px" width="100%" vizType="column" uiConfig="{applicationSet:'fiori'}" selectData=".onDetailSelect">
+                                    <viz:dataset>
+                                        <viz.data:FlattenedDataset data="{view>chartProfit}">
+                                            <viz.data:dimensions><viz.data:DimensionDefinition name="항목" value="{view>name}"/></viz.data:dimensions>
+                                            <viz.data:measures><viz.data:MeasureDefinition name="매출이익" value="{view>value}"/></viz.data:measures>
+                                        </viz.data:FlattenedDataset>
+                                    </viz:dataset>
+                                    <viz:feeds>
+                                        <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="매출이익"/>
+                                        <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="항목"/>
+                                    </viz:feeds>
+                                </viz:VizFrame>
+                            </VBox>
+                            <VBox class="peChartPanel peAccentPurple">
+                                <Title text="이익률 (상위)" level="H3"/>
+                                <viz:VizFrame height="260px" width="100%" vizType="bar" uiConfig="{applicationSet:'fiori'}" selectData=".onDetailSelect">
+                                    <viz:dataset>
+                                        <viz.data:FlattenedDataset data="{view>chartRate}">
+                                            <viz.data:dimensions><viz.data:DimensionDefinition name="항목" value="{view>name}"/></viz.data:dimensions>
+                                            <viz.data:measures><viz.data:MeasureDefinition name="이익률" value="{view>value}"/></viz.data:measures>
+                                        </viz.data:FlattenedDataset>
+                                    </viz:dataset>
+                                    <viz:feeds>
+                                        <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="이익률"/>
+                                        <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="항목"/>
+                                    </viz:feeds>
+                                </viz:VizFrame>
+                            </VBox>
+                            </HBox>
+                        </VBox>
+                        <VBox class="peAnalysisGrid peSig-segment" visible="{= ${view>/meta/selectedTab} === 'segment'}">
+                            <HBox class="peSigSegTop" wrap="Wrap">
+                                <VBox class="peChartPanel peAccentGreen peSigSegHero">
+                                    <Title text="매출액 점유" level="H3"/>
+                                    <viz:VizFrame height="320px" width="100%" vizType="donut" uiConfig="{applicationSet:'fiori'}" selectData=".onDetailSelect">
+                                        <viz:dataset>
+                                            <viz.data:FlattenedDataset data="{view>chartSales}">
+                                                <viz.data:dimensions><viz.data:DimensionDefinition name="항목" value="{view>name}"/></viz.data:dimensions>
+                                                <viz.data:measures><viz.data:MeasureDefinition name="매출액" value="{view>value}"/></viz.data:measures>
+                                            </viz.data:FlattenedDataset>
+                                        </viz:dataset>
+                                        <viz:feeds>
+                                            <viz.feeds:FeedItem uid="size" type="Measure" values="매출액"/>
+                                            <viz.feeds:FeedItem uid="color" type="Dimension" values="항목"/>
+                                        </viz:feeds>
+                                    </viz:VizFrame>
+                                </VBox>
+                                <VBox class="peSigSegSideCol">
+                                    <VBox class="peChartPanel peAccentPurple">
+                                        <Title text="이익률 (상위)" level="H3"/>
+                                        <viz:VizFrame height="150px" width="100%" vizType="bar" uiConfig="{applicationSet:'fiori'}" selectData=".onDetailSelect">
+                                            <viz:dataset>
+                                                <viz.data:FlattenedDataset data="{view>chartRate}">
+                                                    <viz.data:dimensions><viz.data:DimensionDefinition name="항목" value="{view>name}"/></viz.data:dimensions>
+                                                    <viz.data:measures><viz.data:MeasureDefinition name="이익률" value="{view>value}"/></viz.data:measures>
+                                                </viz.data:FlattenedDataset>
+                                            </viz:dataset>
+                                            <viz:feeds>
+                                                <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="이익률"/>
+                                                <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="항목"/>
+                                            </viz:feeds>
+                                        </viz:VizFrame>
+                                    </VBox>
+                                    <VBox class="peChartPanel peAccentAmber">
+                                        <Title text="매출원가 구성" level="H3"/>
+                                        <viz:VizFrame height="150px" width="100%" vizType="donut" uiConfig="{applicationSet:'fiori'}" selectData=".onDetailSelect">
+                                            <viz:dataset>
+                                                <viz.data:FlattenedDataset data="{view>chartCost}">
+                                                    <viz.data:dimensions><viz.data:DimensionDefinition name="항목" value="{view>name}"/></viz.data:dimensions>
+                                                    <viz.data:measures><viz.data:MeasureDefinition name="매출원가" value="{view>value}"/></viz.data:measures>
+                                                </viz.data:FlattenedDataset>
+                                            </viz:dataset>
+                                            <viz:feeds>
+                                                <viz.feeds:FeedItem uid="size" type="Measure" values="매출원가"/>
+                                                <viz.feeds:FeedItem uid="color" type="Dimension" values="항목"/>
+                                            </viz:feeds>
+                                        </viz:VizFrame>
+                                    </VBox>
+                                </VBox>
+                            </HBox>
+                            <VBox class="peChartPanel peAccentBlue">
+                                <Title text="매출이익 (상위)" level="H3"/>
+                                <viz:VizFrame height="240px" width="100%" vizType="bar" uiConfig="{applicationSet:'fiori'}" selectData=".onDetailSelect">
+                                    <viz:dataset>
+                                        <viz.data:FlattenedDataset data="{view>chartProfit}">
+                                            <viz.data:dimensions><viz.data:DimensionDefinition name="항목" value="{view>name}"/></viz.data:dimensions>
+                                            <viz.data:measures><viz.data:MeasureDefinition name="매출이익" value="{view>value}"/></viz.data:measures>
+                                        </viz.data:FlattenedDataset>
+                                    </viz:dataset>
+                                    <viz:feeds>
+                                        <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="매출이익"/>
+                                        <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="항목"/>
+                                    </viz:feeds>
+                                </viz:VizFrame>
+                            </VBox>
+                        </VBox>
+                    </VBox>
+                </VBox>
+
+                <!-- ===== 적자 알림(모든 항목 공통, 상세 하단) ===== -->
+                <VBox class="peLossLog peSection">
+                    <HBox class="peSectionHeader" alignItems="Center" justifyContent="SpaceBetween">
+                        <Title text="적자 알림" level="H2"/>
+                        <Text text="{view>/meta/lossCount}건 · 기간 {view>/meta/periodText}" class="peCountChip"/>
+                    </HBox>
+                    <Table items="{view>/lossLog}" mode="None" growing="true" growingThreshold="50" class="peLossTable" noDataText="적자 레코드 없음">
+                        <columns>
+                            <Column width="9rem"><Text text="월"/></Column>
+                            <Column width="11rem"><Text text="제품코드"/></Column>
+                            <Column><Text text="제품명"/></Column>
+                            <Column width="9rem"><Text text="거래처코드"/></Column>
+                            <Column><Text text="거래처명"/></Column>
+                            <Column hAlign="End" width="12rem"><Text text="매출이익"/></Column>
+                        </columns>
+                        <items>
+                            <ColumnListItem>
+                                <cells>
+                                    <Text text="{view>month}"/>
+                                    <Text text="{view>matnrCode}"/>
+                                    <Text text="{view>matnr}"/>
+                                    <Text text="{view>partnerCode}"/>
+                                    <Text text="{view>partner}"/>
+                                    <Text text="{view>profitText}" class="peLossAmt"/>
+                                </cells>
+                            </ColumnListItem>
+                        </items>
+                    </Table>
+                </VBox>
+
+            </VBox>
+        </content>
+    </Page>
+</mvc:View>
