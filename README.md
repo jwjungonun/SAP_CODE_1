@@ -41,10 +41,10 @@ SD, MM, PP, FI/CO, QM 모듈을 하나의 흐름으로 연결하여 주문부터
 <hr>
 
 ## Event Flow Diagram
-![프로세스 흐름도]([이미지 URL])
+![프로세스 흐름도](images/event_flow_diagram.png)
 
 ## ERD Diagram
-![ERD]([이미지 URL])
+![ERD](images/erd_diagram.png)
 
 
 <hr>
