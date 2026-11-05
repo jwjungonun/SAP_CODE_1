@@ -55,7 +55,8 @@ SD, MM, PP, FI/CO, QM 모듈을 하나의 흐름으로 연결하여 주문부터
 
 ### 관리회계 전표 조회 <br>
 
-![관리회계 전표 조회 화면]([이미지 URL])<br>
+<img width="616" height="515" alt="image" src="https://github.com/user-attachments/assets/6eb1a61b-4343-42d0-94fd-dec20d5584a8" />
+
 - 관리회계 영역, 회계연도 등 조건별 전표 조회
 - 현재 기준 지난 한 달을 전기일 기본 조회 기간으로 설정
 - 조회 결과가 없을 경우 에러 메시지 팝업 출력
