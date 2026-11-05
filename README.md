@@ -62,7 +62,8 @@ SD, MM, PP, FI/CO, QM 모듈을 하나의 흐름으로 연결하여 주문부터
 - 조회 결과가 없을 경우 에러 메시지 팝업 출력
 <br>
 
-![관리회계 전표 조회 결과 화면]([이미지 URL])<br>
+<img width="627" height="483" alt="image" src="https://github.com/user-attachments/assets/ff553c58-1b50-42ff-b8f1-cffdd11fa7e5" />
+
 - 상단 컨테이너의 조회 조건 및 전표 항목 건수 확인
 - 전표 행 더블클릭 시 전표 아이템 상세 조회
 - CO 마스터 관리 및 배부 사이클 화면 이동 기능
