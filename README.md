@@ -29,12 +29,12 @@ SD, MM, PP, FI/CO, QM 모듈을 하나의 흐름으로 연결하여 주문부터
 <img src="https://img.shields.io/badge/SD-F0AB00?style=for-the-badge&logoColor=white"/> <img src="https://img.shields.io/badge/MM-F0AB00?style=for-the-badge&logoColor=white"/> <img src="https://img.shields.io/badge/PP-F0AB00?style=for-the-badge&logoColor=white"/> <img src="https://img.shields.io/badge/FI-F0AB00?style=for-the-badge&logoColor=white"/> <img src="https://img.shields.io/badge/CO-F0AB00?style=for-the-badge&logoColor=white"/> <img src="https://img.shields.io/badge/QM-F0AB00?style=for-the-badge&logoColor=white"/><br>
 
 
-#### Back-end
+#### Development
 
 <img src="https://img.shields.io/badge/ABAP-1F6FEB?style=for-the-badge&logo=sap&logoColor=white"/> <img src="https://img.shields.io/badge/CDS_View-1F6FEB?style=for-the-badge&logo=sap&logoColor=white"/> <img src="https://img.shields.io/badge/RAP-1F6FEB?style=for-the-badge&logo=sap&logoColor=white"/> <img src="https://img.shields.io/badge/OData-1F6FEB?style=for-the-badge&logo=odata&logoColor=white"/><br>
 
 
-#### Front-end
+#### UI
 
 <img src="https://img.shields.io/badge/SAP_Fiori-0A6ED1?style=for-the-badge&logo=sap&logoColor=white"/> <img src="https://img.shields.io/badge/SAPUI5-0A6ED1?style=for-the-badge&logo=sap&logoColor=white"/><br>
 
